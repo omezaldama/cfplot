@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<link rel="stylesheet" href="https://bootswatch.com/4/united/bootstrap.min.css" />
+	<title>Gr&aacute;ficas</title>
+	<style type="text/css">
+		.badge-info {
+			font-size: 1.2em;
+		}
+		.badge-pill {
+			font-size: 1em;
+		}
+		#currentFunction {
+			font-size: 1.5em;
+			font-family: "Comic Sans MS", cursive, sans-serif;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="row justify-content-center">
+		<div class="container row justify-content-center">
+			<h1><small class="text-muted">La funci&oacute;n seno</small></h1>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-10 col-lg-8">
+			<table class="table table-hover">
+				<tr class="table-light"><td>
+					<span class="badge badge-info">Frecuencia:</span>
+					<input type="range" min="0.5" max="8" value="1" step="any" id="frequencySlider">
+					<span class="badge badge-pill badge-info param-value" id="frequencyValue">1</span>
+				</td></tr>
+				<tr class="table-light"><td>
+					<span class="badge badge-info">Amplitud:</span>
+					<input type="range" min="0.1" max="3" value="1" step="any" id="amplitudeSlider">
+					<span class="badge badge-pill badge-info param-value" id="amplitudeValue">1</span>
+				</td></tr>
+				<tr class="table-light"><td>
+					<span class="badge badge-info">Fase inicial:</span>
+					<input type="range" min="-5" max="5" value="0" step="any" id="initialPhaseSlider">
+					<span class="badge badge-pill badge-info param-value" id="initialPhaseValue">0</span>
+				</td></tr>
+			</table>
+			<div class="container">
+				<em><p class="text-info" id="currentFunction">sen(x)</p></em>
+			</div>
+			<div id="canvas"></div>
+			<div class="container">
+				<button class="btn btn-outline-info" id="resetButton">Valores por defecto</button>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		Aqu&iacute; puedes graficar la función seno y variar sus par&aacute;metros. Esta en general tiene 3 par&aacute;metros, llamados amplitud, frecuencia y fase inicial.
+		La amplitud es el factor que aparece multiplicando al seno, y controla qu&eacute; tan alto y bajo llega la gr&aacute;fica.
+		La frecuencia es el factor que multiplica a la variable (en este caso x), controla qu&eacute; tantos ciclos da la gr&aacute;fica en un rango determinado.
+		La fase inicial es un término constante que se le añade al argumento de la funci&oacute;n seno; controla el desplazamiento de la gr&aacute;fica.
+		Si aumentas/disminuyes la amplitud, ¿qu&eacute; le pasa a la gráfica?
+		Si aumentas/disminuyes la frecuencia, ¿qu&eacute; le pasa a la gráfica?
+		Si aumentas/disminuyes la fase inicial, ¿qu&eacute; le pasa a la gráfica? Si la disminuyes, ¿se mueve a la izquierda o a la derecha?. ¿Y si la aumentas?
+		Cuando cambias alguno de los par&aacute;metros, ¿el cambio afecta de alguna manera a los otros dos?
+	</div>
+	<script src="https://unpkg.com/d3@3/d3.min.js"></script>
+	<script src="https://unpkg.com/function-plot@1/dist/function-plot.js"></script>
+</body>
+
+<script>
+const defaultFrequency = 1;
+const defaultAmplitude = 1;
+const defaultInitialPhase = 0;
+const defaultOptions = {
+	target: '#canvas',
+	data: [{
+		fn: defaultAmplitude.toString() + '*sin(' + defaultFrequency.toString() + '*x)'
+	}]
+};
+const nDecimals = 2;
+let frequency = defaultFrequency;
+let amplitude = defaultAmplitude;
+let initialPhase = defaultInitialPhase;
+let options = defaultOptions;
+functionPlot(options);
+
+function writeFunction() {
+	let f = '';
+	if (amplitude != 1) {
+		f += amplitude.toFixed(nDecimals).toString();
+	}
+	f += 'sen(';
+	if (frequency != 1) {
+		f += frequency.toFixed(nDecimals).toString();
+	}
+	f += 'x';
+	if (initialPhase != 0) {
+		if (initialPhase > 0) {
+			f += '+';
+		}
+		else {
+			f += '&ndash;';
+		}
+		f += Math.abs(initialPhase).toFixed(nDecimals).toString();
+	}
+	f += ')';
+	document.getElementById('currentFunction').innerHTML = f;
+}
+
+function updatePlot() {
+	options = {
+		target: '#canvas',
+		data: [{
+			fn: amplitude.toString() + '*sin(' + frequency.toString() + '*x+' + initialPhase.toString() + ')'
+		}]
+	};
+	document.getElementById('frequencyValue').innerHTML = frequency.toFixed(nDecimals);
+	document.getElementById('amplitudeValue').innerHTML = amplitude.toFixed(nDecimals);
+	document.getElementById('initialPhaseValue').innerHTML = initialPhase.toFixed(nDecimals);
+	writeFunction();
+	functionPlot(options);
+}
+
+document.getElementById('frequencySlider').addEventListener('input', (e) => {
+	frequency = parseFloat(e.target.value);
+	updatePlot();
+});
+document.getElementById('amplitudeSlider').addEventListener('input', (e) => {
+	amplitude = parseFloat(e.target.value);
+	updatePlot();
+});
+document.getElementById('initialPhaseSlider').addEventListener('input', (e) => {
+	initialPhase = parseFloat(e.target.value);
+	updatePlot();
+});
+
+document.getElementById('resetButton').addEventListener('click', () => {
+	frequency = defaultFrequency;
+	amplitude = defaultAmplitude;
+	initialPhase = defaultInitialPhase;
+	options = defaultOptions;
+	document.getElementById('frequencySlider').value = 1;
+	document.getElementById('frequencyValue').innerHTML = 1;
+	document.getElementById('amplitudeSlider').value = 1;
+	document.getElementById('amplitudeValue').innerHTML = 1;
+	document.getElementById('initialPhaseSlider').value = 0;
+	document.getElementById('initialPhaseValue').innerHTML = 0;
+	functionPlot(options);
+});
+</script>
+ <noscript>Your browser does not support JavaScript!</noscript> 
+
+</html>
